@@ -8,6 +8,10 @@ const serverPort = 4000
 const server = createServer(app)
 
 const words = ["VERDE","ROPAS","SEÑAS","CIEGO","COCHE","AGUJA","RADIO"]
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+}
+
 
 const io = new Server(server,{
     cors:{
@@ -28,6 +32,8 @@ app.use("/",(req,res)=> res.send('ta andando'))
 //Soquete
 let userList = []
 
+let word = words[getRandomInt(words.length)]
+
 io.on("connection",(socket)=>{
     console.log('hola -->', socket.id)
     socket.on("addUser",(user)=>{
@@ -39,9 +45,10 @@ io.on("connection",(socket)=>{
         }
         socket.emit("getUsers",userList)
     })
-
+    
+    io.emit("newWord",word)
     socket.emit("getUsers",userList)
-
+    
     socket.on('disconnect',()=>{
         const index = userList.findIndex((el)=>el.id == socket.id)
         if (index != -1){
@@ -53,12 +60,8 @@ io.on("connection",(socket)=>{
 
 
     // Word
-    function getRandomInt(max) {
-        return Math.floor(Math.random() * max);
-    }
+
     
-    let word = words[getRandomInt(words.length)]
-    socket.emit("newWord",word)
     // setInterval(() => {
     //     console.log('nueva palabra -->',word)
     //     socket.emit("newWord",word)
